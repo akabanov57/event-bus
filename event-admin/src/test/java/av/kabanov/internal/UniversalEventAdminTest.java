@@ -2,6 +2,7 @@ package av.kabanov.internal;
 
 import av.kabanov.event.Event;
 import av.kabanov.event.EventAdmin;
+import av.kabanov.event.EventAdminFactory;
 import av.kabanov.event.Subscriber;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +34,7 @@ class UniversalEventAdminTest {
   @Test
   @DisplayName("1. Тест FIFO: События с одинаковым routingKey должны обрабатываться строго по порядку")
   void testStrictFifoOrderingByRoutingKey() throws InterruptedException {
-    try (EventAdmin eventAdmin = EventAdmin.create()) {
+    try (EventAdmin eventAdmin = EventAdminFactory.create()) {
       int eventsCount = 100;
       String topic = "orders/processed";
       String accountKey = "account-42";
@@ -81,7 +82,7 @@ class UniversalEventAdminTest {
   @Test
   @DisplayName("2. Тест Bulkhead: Зависание одного корневого топика не должно блокировать быстрые события в других топиках")
   void testBulkheadIsolationBetweenRootTopics() throws InterruptedException {
-    EventAdmin eventAdmin = EventAdmin.create();
+    EventAdmin eventAdmin = EventAdminFactory.create();
 
     String heavyTopic = "heavy/data/analytics";
     String fastTopic = "auth/user/login";
@@ -140,7 +141,7 @@ class UniversalEventAdminTest {
     String topic = "billing/invoice";
 
     // Создаем шину со специальным хэндлером для верификации ошибок
-    EventAdmin eventAdmin = EventAdmin.create((_, throwable, listenerName) -> {
+    EventAdmin eventAdmin = EventAdminFactory.create((_, throwable, listenerName) -> {
       caughtThrowable.set(throwable);
       caughtListenerName.set(listenerName);
       exceptionLatch.countDown(); // Сигнализируем о перехвате ошибки
@@ -183,7 +184,7 @@ class UniversalEventAdminTest {
   @Test
   @DisplayName("4. Тест масок топиков: Подписка на wildcard должна корректно ловить вложенные структуры")
   void testWildcardTopicMatching() throws InterruptedException {
-    try (EventAdmin eventAdmin = EventAdmin.create()) {
+    try (EventAdmin eventAdmin = EventAdminFactory.create()) {
       String pattern = "app/events/*";
       String concreteTopic = "app/events/user/registered";
 
@@ -207,7 +208,7 @@ class UniversalEventAdminTest {
   @Test
   @DisplayName("5. Граничный случай: subscribe() после close() должен гарантированно выбрасывать IllegalStateException")
   void testSubscribeAfterCloseThrowsException() {
-    EventAdmin eventAdmin = EventAdmin.create();
+    EventAdmin eventAdmin = EventAdminFactory.create();
     eventAdmin.close(); // Закрываем шину до любых операций
 
     // Проверяем, что шина жестко блокирует новые подписки
@@ -224,7 +225,7 @@ class UniversalEventAdminTest {
   @Test
   @DisplayName("6. Граничный случай: postEvent() после close() должен гарантированно выбрасывать IllegalStateException")
   void testPostEventAfterCloseThrowsException() {
-    EventAdmin eventAdmin = EventAdmin.create();
+    EventAdmin eventAdmin = EventAdminFactory.create();
     eventAdmin.close(); // Закрываем шину
 
     // Проверяем, что продюсеры не могут отправлять данные в закрытую систему
@@ -245,7 +246,7 @@ class UniversalEventAdminTest {
   @Test
   @DisplayName("7. Граничный случай: Интенсивная публикация параллельно с close() не должна приводить к зависанию или OOM")
   void testConcurrentPostEventAndClose() throws InterruptedException {
-    EventAdmin eventAdmin = EventAdmin.create();
+    EventAdmin eventAdmin = EventAdminFactory.create();
     String topic = "concurrent/shutdown";
 
     // Регистрируем пустой подписчик
@@ -296,7 +297,7 @@ class UniversalEventAdminTest {
   @Test
   @DisplayName("8. Граничный случай: Отмена подписки (Subscriber.close()) после close() шины должна быть идемпотентной и безопасной")
   void testSubscriberCloseAfterAdminClose() {
-    EventAdmin eventAdmin = EventAdmin.create();
+    EventAdmin eventAdmin = EventAdminFactory.create();
 
     // Создаем активную подписку
     Subscriber subscriber = eventAdmin.subscribe("lifecycle/test", TestEvent.class, _ -> {

@@ -1,6 +1,5 @@
 package av.kabanov.event;
 
-import av.kabanov.internal.UniversalEventAdmin;
 import java.util.function.Consumer;
 
 /**
@@ -31,22 +30,6 @@ public interface EventAdmin extends AutoCloseable {
    * @throws IllegalStateException если шина событий уже закрыта
    */
   void postEvent(Event event);
-
-  // --- Фабричные методы ---
-
-  /**
-   * Создает экземпляр шины со стандартным выводом ошибок в System.err.
-   */
-  static EventAdmin create() {
-    return new UniversalEventAdmin(null);
-  }
-
-  /**
-   * Создает экземпляр шины с кастомной стратегией обработки исключений.
-   */
-  static EventAdmin create(EventExceptionHandler exceptionHandler) {
-    return new UniversalEventAdmin(exceptionHandler);
-  }
 
   /**
    * Переопределяем метод close() из AutoCloseable, убирая 'throws Exception'. Теперь шину можно

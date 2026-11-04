@@ -75,7 +75,7 @@ class EventAdminStressTest {
   @DisplayName("Стресс-тест: Максимальная пропускная способность, проверка Backpressure и утечек памяти")
   void performanceAndMemoryStressTest() throws InterruptedException {
     // Инициализируем шину со стандартным обработчиком ошибок
-    EventAdmin eventAdmin = EventAdmin.create(
+    EventAdmin eventAdmin = EventAdminFactory.create(
         (_, throwable, _) ->
             System.err.printf("Критическая ошибка при стресс-тесте: %s%n", throwable.getMessage()));
 
