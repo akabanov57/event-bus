@@ -1,0 +1,7 @@
+
+Real-World Business Code Scenario
+
+1. A restaurant creates an order and dispatches the order_placed event.
+2. The taxi/delivery service intercepts this event, searches for a driver, and generates a new event — courier_assigned — as soon as one is found.
+3. The mapping service intercepts the courier assignment event to start building a route on the map for the customer.
+

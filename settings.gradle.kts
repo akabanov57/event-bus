@@ -10,5 +10,13 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
+gradle.projectsLoaded {
+    rootProject.allprojects {
+        group = "av.kabanov"
+        version = "1.0.0-SNAPSHOT"
+    }
+}
+
 rootProject.name = "event-bus"
 include(":event-admin")
+include(":example")
